@@ -5,7 +5,7 @@ const theme = {
     bg: "#F7F8FA",
     card: "#FFFFFF",
     primary: "#00C9B7",
-    primaryDark: "#00A89A",
+    primaryDark: "#00A89B",
     accent: "#1A2B4A",
     text: "#2D3748",
     textLight: "#718096",
@@ -24,7 +24,7 @@ const questions = [
     {
         id: "nomina",
         text: "¿Tus ingresos provienen únicamente de nómina/s?",
-        helpText: "Es decir, solo recibes ingresos como empleado por cuenta ajena.",
+        helpText: "Es decir, solo recibes ingresos como empleado por cuenta ajena o una nómina como autónomo societario",
     },
     {
         id: "facturas",
