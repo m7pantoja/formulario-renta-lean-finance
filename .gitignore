@@ -1,0 +1,18 @@
+# Dependencias
+node_modules/
+
+# Build de producción
+dist/
+
+# Variables de entorno (contiene secretos)
+.env
+
+# Datos locales
+data/
+
+# Logs
+*.log
+
+# Sistema
+.DS_Store
+Thumbs.db

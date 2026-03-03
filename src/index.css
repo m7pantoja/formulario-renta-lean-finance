@@ -1,0 +1,31 @@
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  font-family: "DM Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: #f7f8fa;
+  color: #2d3748;
+  line-height: 1.5;
+}
+
+input:focus {
+  outline: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: #00c9b740;
+}
