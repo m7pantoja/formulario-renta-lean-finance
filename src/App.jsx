@@ -137,6 +137,8 @@ export default function App() {
     const [loadingSubs, setLoadingSubs] = useState(false);
     const [animating, setAnimating] = useState(false);
     const [direction, setDirection] = useState("forward");
+    const [deletingId, setDeletingId] = useState(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
     // Auth state
     const [adminToken, setAdminToken] = useState(
@@ -216,6 +218,27 @@ export default function App() {
         },
         [adminToken]
     );
+
+    const deleteSubmission = async (id) => {
+        setDeletingId(id);
+        try {
+            const res = await fetch(`/api/submissions/${id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${adminToken}` },
+            });
+            if (res.ok) {
+                setSubmissions((prev) => prev.filter((s) => s.id !== id));
+            } else if (res.status === 401) {
+                setAdminToken(null);
+                sessionStorage.removeItem("lf_token");
+                setView("login");
+            }
+        } catch (e) {
+            console.error("Error deleting submission:", e);
+        }
+        setDeletingId(null);
+        setConfirmDeleteId(null);
+    };
 
     // ── Form logic ────────────────────────────────────────────────
     const handleAnswer = async (value) => {
@@ -496,6 +519,75 @@ export default function App() {
             fontSize: "12px",
             fontWeight: 700,
         }),
+        deleteBtn: {
+            background: "none",
+            border: `1px solid ${theme.danger}40`,
+            color: theme.danger,
+            padding: "6px 14px",
+            borderRadius: "8px",
+            cursor: "pointer",
+            fontSize: "12px",
+            fontWeight: 600,
+            transition: "all 0.2s",
+        },
+        confirmOverlay: {
+            position: "fixed",
+            inset: 0,
+            background: "rgba(26,43,74,0.5)",
+            backdropFilter: "blur(4px)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 200,
+        },
+        confirmCard: {
+            background: "#fff",
+            borderRadius: "20px",
+            padding: "36px 32px",
+            maxWidth: "400px",
+            width: "90%",
+            boxShadow: "0 20px 60px rgba(0,0,0,0.15)",
+            textAlign: "center",
+        },
+        confirmTitle: {
+            fontSize: "18px",
+            fontWeight: 700,
+            color: theme.accent,
+            marginBottom: "8px",
+        },
+        confirmText: {
+            fontSize: "14px",
+            color: theme.textLight,
+            marginBottom: "24px",
+            lineHeight: 1.5,
+        },
+        confirmBtnRow: {
+            display: "flex",
+            gap: "10px",
+            justifyContent: "center",
+        },
+        confirmBtnCancel: {
+            padding: "10px 24px",
+            borderRadius: "10px",
+            border: `1px solid ${theme.border}`,
+            background: "#fff",
+            color: theme.text,
+            fontSize: "14px",
+            fontWeight: 600,
+            cursor: "pointer",
+            transition: "all 0.2s",
+        },
+        confirmBtnDelete: {
+            padding: "10px 24px",
+            borderRadius: "10px",
+            border: "none",
+            background: theme.danger,
+            color: "#fff",
+            fontSize: "14px",
+            fontWeight: 700,
+            cursor: "pointer",
+            transition: "all 0.2s",
+        },
         // Login overlay
         overlay: {
             position: "fixed",
@@ -862,6 +954,7 @@ export default function App() {
                                 <th style={styles.th}>Email</th>
                                 <th style={styles.th}>Teléfono</th>
                                 <th style={styles.th}>Plan</th>
+                                <th style={{ ...styles.th, textAlign: 'center' }}>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -889,11 +982,58 @@ export default function App() {
                                                 Plan {s.plan}
                                             </span>
                                         </td>
+                                        <td style={{ ...styles.td, textAlign: 'center' }}>
+                                            <button
+                                                style={{
+                                                    ...styles.deleteBtn,
+                                                    opacity: deletingId === s.id ? 0.5 : 1,
+                                                    pointerEvents: deletingId === s.id ? 'none' : 'auto',
+                                                }}
+                                                onClick={() => setConfirmDeleteId(s.id)}
+                                                onMouseEnter={(e) => {
+                                                    e.target.style.background = `${theme.danger}15`;
+                                                    e.target.style.borderColor = theme.danger;
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    e.target.style.background = 'none';
+                                                    e.target.style.borderColor = `${theme.danger}40`;
+                                                }}
+                                            >
+                                                {deletingId === s.id ? 'Eliminando...' : '🗑 Eliminar'}
+                                            </button>
+                                        </td>
                                     </tr>
                                 );
                             })}
                         </tbody>
                     </table>
+                </div>
+            )}
+
+            {/* Confirmation dialog */}
+            {confirmDeleteId && (
+                <div style={styles.confirmOverlay} onClick={() => setConfirmDeleteId(null)}>
+                    <div style={styles.confirmCard} onClick={(e) => e.stopPropagation()}>
+                        <div style={{ fontSize: '40px', marginBottom: '12px' }}>⚠️</div>
+                        <div style={styles.confirmTitle}>¿Eliminar este registro?</div>
+                        <div style={styles.confirmText}>
+                            Esta acción no se puede deshacer. El registro será eliminado permanentemente.
+                        </div>
+                        <div style={styles.confirmBtnRow}>
+                            <button
+                                style={styles.confirmBtnCancel}
+                                onClick={() => setConfirmDeleteId(null)}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                style={styles.confirmBtnDelete}
+                                onClick={() => deleteSubmission(confirmDeleteId)}
+                            >
+                                {deletingId ? 'Eliminando...' : 'Sí, eliminar'}
+                            </button>
+                        </div>
+                    </div>
                 </div>
             )}
         </div>

@@ -105,6 +105,22 @@ app.get("/api/submissions", authMiddleware, async (_req, res) => {
     res.json(submissions);
 });
 
+// Admin: delete a submission (protected)
+app.delete("/api/submissions/:id", authMiddleware, async (req, res) => {
+    const { id } = req.params;
+    const { error } = await supabase
+        .from("submissions")
+        .delete()
+        .eq("id", id);
+
+    if (error) {
+        console.error("Supabase delete error:", error);
+        return res.status(500).json({ error: "Error al eliminar" });
+    }
+
+    res.json({ ok: true });
+});
+
 // --- Serve React build in production ---
 const distPath = join(__dirname, "dist");
 if (existsSync(distPath)) {
