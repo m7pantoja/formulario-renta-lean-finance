@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 
 // ── Lean Finance brand palette ──────────────────────────────────
 const theme = {
@@ -139,7 +139,7 @@ export default function App() {
     const [direction, setDirection] = useState("forward");
     const [deletingId, setDeletingId] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
+    const submittingRef = useRef(false);
 
     // Auth state
     const [adminToken, setAdminToken] = useState(
@@ -243,7 +243,7 @@ export default function App() {
 
     // ── Form logic ────────────────────────────────────────────────
     const handleAnswer = async (value) => {
-        if (submitting) return;
+        if (submittingRef.current) return;
         const qId = questions[step - 1].id;
         const newAnswers = { ...answers, [qId]: value };
         setAnswers(newAnswers);
@@ -256,11 +256,11 @@ export default function App() {
                 setAnimating(false);
             }, 300);
         } else {
-            setSubmitting(true);
+            submittingRef.current = true;
             const planNum = determinePlan(newAnswers);
             setResult(planNum);
             await saveSubmission(planNum);
-            setSubmitting(false);
+            submittingRef.current = false;
             setDirection("forward");
             setAnimating(true);
             setTimeout(() => {
