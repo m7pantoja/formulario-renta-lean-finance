@@ -139,6 +139,7 @@ export default function App() {
     const [direction, setDirection] = useState("forward");
     const [deletingId, setDeletingId] = useState(null);
     const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+    const [submitting, setSubmitting] = useState(false);
 
     // Auth state
     const [adminToken, setAdminToken] = useState(
@@ -242,6 +243,7 @@ export default function App() {
 
     // ── Form logic ────────────────────────────────────────────────
     const handleAnswer = async (value) => {
+        if (submitting) return;
         const qId = questions[step - 1].id;
         const newAnswers = { ...answers, [qId]: value };
         setAnswers(newAnswers);
@@ -254,9 +256,11 @@ export default function App() {
                 setAnimating(false);
             }, 300);
         } else {
+            setSubmitting(true);
             const planNum = determinePlan(newAnswers);
             setResult(planNum);
             await saveSubmission(planNum);
+            setSubmitting(false);
             setDirection("forward");
             setAnimating(true);
             setTimeout(() => {
